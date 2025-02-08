@@ -74,7 +74,7 @@ builder.Services.AddCors(options =>
         builder =>
         {
             builder
-                .WithOrigins("http://localhost:5173", "http://localhost:5174", "http://localhost:5175")
+                .WithOrigins("https://create-mediashop.azurewebsites.net", "https://mediashop.azurewebsites.net")
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials()
