@@ -1,5 +1,6 @@
 using MediaShop.Business.Interfaces;
 using MediaShop.Business.Models;
+using MediaShop.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
@@ -8,11 +9,13 @@ namespace MediaShop.Controllers;
 
 [ApiController]
 [Route("/api/users")]
-public class UserController(IAuthService authService, IUserService userService) : ControllerBase
+public class UserController(IAuthService authService, IUserService userService, IServiceProvider serviceProvider) : ControllerBase
 {
     private readonly IAuthService _authService = authService;
 
     private readonly IUserService _userService = userService;
+
+    private readonly IServiceProvider _serviceProvider = serviceProvider;
 
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromForm] RegisterDto registerDto, IFormFile? avatar)
@@ -62,7 +65,6 @@ public class UserController(IAuthService authService, IUserService userService) 
     }
 
     [HttpGet("{id}/roles")]
-    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> GetUserRoles(int id)
     {
         return Ok(await _userService.GetRolesAsync(id));
@@ -82,4 +84,31 @@ public class UserController(IAuthService authService, IUserService userService) 
     {
         return Ok(await _userService.GetUserProfileAsync(id));
     }
+
+    [HttpPost("{id}/roles")]
+    public async Task<IActionResult> AddToRoles()
+    {
+        await _userService.AddToRolesAsync();
+        return Ok();
+    }
+
+    [HttpGet("{id}/admin")]
+    public async Task<IActionResult> CheckAdmin(int id)
+    {
+        return Ok(await _userService.CheckAdminAsync(id));
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetUsers()
+    {
+        return Ok(await _userService.GetAllAsync());
+    }
+
+    [HttpPost("users")]
+    public async Task<IActionResult> SeedUsers()
+    {
+        await DataSeed.SeedUsers(_serviceProvider);
+        return Ok("Користувачі успішно додані!");
+    }
+
 }

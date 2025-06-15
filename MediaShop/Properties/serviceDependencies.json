@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "apis2": {
+      "ignored": "true",
+      "type": "apis.azure"
+    },
+    "apis1": {
+      "ignored": "true",
+      "type": "apis"
+    }
+  }
+}

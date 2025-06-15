@@ -19,4 +19,10 @@ public interface IUserService
     Task<IEnumerable<RoleDto>> GetRolesAsync(int userId);
 
     Task<ProfileDto> GetUserProfileAsync(int userId);
+
+    Task AddToRolesAsync();
+
+    Task<bool> CheckAdminAsync(int userId);
+
+    Task<IEnumerable<UserDto>> GetAllAsync();
 }

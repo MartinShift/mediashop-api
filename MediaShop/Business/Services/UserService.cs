@@ -6,10 +6,11 @@ using MediaShop.Business.Validation;
 using MediaShop.Data.Entities;
 using MediaShop.Data.Interfaces;
 using MediaShop.Exceptions;
+using Microsoft.AspNetCore.Identity;
 
 namespace MediaShop.Business.Services;
 
-public class UserService(IUnitOfWork unitOfWork, IMapper mapper, IMediaService mediaService, ILogger<UserService> logger, UpdateUserDtoValidator updateUserDtoValidator) : IUserService
+public class UserService(IUnitOfWork unitOfWork, IMapper mapper, IMediaService mediaService, ILogger<UserService> logger, UpdateUserDtoValidator updateUserDtoValidator, UserManager<User> userManager, RoleManager<Role> roleManager) : IUserService
 {
     private IUnitOfWork _unitOfWork { get; } = unitOfWork;
 
@@ -20,6 +21,10 @@ public class UserService(IUnitOfWork unitOfWork, IMapper mapper, IMediaService m
     private UpdateUserDtoValidator _updateUserDtoValidator { get; } = updateUserDtoValidator;
 
     private IMediaService _mediaService { get; } = mediaService;
+
+    private UserManager<User> _userManager { get; } = userManager;
+
+    private RoleManager<Role> _roleManager { get; } = roleManager;
 
 
     public async Task<UserDto> GetByEmailAsync(string email)
@@ -103,5 +108,21 @@ public class UserService(IUnitOfWork unitOfWork, IMapper mapper, IMediaService m
         _logger.LogInformation($"Getting profile for user with id: {userId}");
         var user = await _unitOfWork.UserRepository.GetByIdAsync(userId);
         return _mapper.Map<ProfileDto>(user);
+    }
+
+    public async Task AddToRolesAsync()
+    {
+        await _roleManager.CreateAsync(new Role { Name = "Admin" });
+        await _roleManager.CreateAsync(new Role { Name = "User" });
+        await _userManager.AddToRoleAsync(await _unitOfWork.UserRepository.GetByIdAsync(1), "Admin");
+        await _userManager.AddToRoleAsync(await _unitOfWork.UserRepository.GetByIdAsync(3), "Admin");
+        await _userManager.AddToRoleAsync(await _unitOfWork.UserRepository.GetByIdAsync(4), "Admin");
+        await _unitOfWork.SaveChangesAsync();
+    }
+
+    public async Task<bool> CheckAdminAsync(int userId)
+    {
+        var user = await _unitOfWork.UserRepository.GetByIdAsync(userId);
+        return await _userManager.IsInRoleAsync(user, "Admin");
     }
 }

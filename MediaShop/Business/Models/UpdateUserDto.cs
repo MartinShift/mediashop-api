@@ -6,5 +6,5 @@ public class UpdateUserDto
 
     public string VisibleName { get; set; }
 
-    public string About { get; set; }
+    public string? About { get; set; }
 }

@@ -11,7 +11,7 @@ public class MappingProfile : Profile
     {
         CreateMap<UserDto, User>();
         CreateMap<User, UserDto>()
-              .ForMember(dest => dest.OrderCount, opt => opt.MapFrom(src => src.Orders.Where(x=> x.Status == OrderStatus.InProgress).Count()));
+              .ForMember(dest => dest.OrderCount, opt => opt.MapFrom(src => src.Orders.Where(x => x.Status == OrderStatus.InProgress).Count()));
         CreateMap<User, ProfileDto>()
                           .ForMember(dest => dest.AverageRating, opt => opt.MapFrom(src =>
         src.Reviews.Any() ? (double?)src.Products.Where(x => x.Reviews.Count > 0).Average(x => x.Reviews.Average(x => x.Rating)) : null));
@@ -32,7 +32,8 @@ public class MappingProfile : Profile
         CreateMap<Review, ReviewDto>();
 
         CreateMap<CategoryDto, Category>();
-        CreateMap<Category, CategoryDto>();
+        CreateMap<Category, CategoryDto>()
+              .ForMember(dest => dest.ProductCount, opt => opt.MapFrom(src => src.Products.Count()));
 
         CreateMap<RoleDto, Role>();
         CreateMap<Role, RoleDto>();

@@ -28,13 +28,15 @@ public class CategoryController(ICategoryService categoryService) : ControllerBa
     {
         return Ok(await _categoryService.CreateAsync(categoryDto));
     }
-    [Authorize]
+
+    [Authorize(Roles = "Admin")]
     [HttpPut]
     public async Task<IActionResult> UpdateCategory([FromBody] CategoryDto categoryDto)
     {
         return Ok(await _categoryService.UpdateAsync(categoryDto));
     }
-    [Authorize]
+
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteCategory(int id)
     {

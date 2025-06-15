@@ -11,9 +11,12 @@ using MediaShop.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Globalization;
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 
@@ -23,7 +26,20 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddMemoryCache();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "MediaShop API",
+        Version = "v1",
+        Description = "MediaShop API Description",
+        Contact = new OpenApiContact
+        {
+            Name = "Martin",
+            Email = "mori.steamer@gmail.com"
+        }
+    });
+});
 builder.Services.Configure<AuthSettings>(builder.Configuration.GetSection("Jwt"));
 builder.Services.Configure<BlobStorageSettings>(builder.Configuration.GetSection("Azure:BlobStorage"));
 builder.Services.AddDbContext<MediaShopContext>(options =>
@@ -95,6 +111,21 @@ builder.Services.AddControllers(options =>
 CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<MediaShopContext>();
+        context.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while migrating the database.");
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
